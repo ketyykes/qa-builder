@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # 📄 PRD：決策樹問答系統產生器（QA Builder）
 
