@@ -1,0 +1,28 @@
+# 建構產生的檔案
+dist/
+build/
+coverage/
+
+# 依賴包
+node_modules/
+
+# 日誌檔案
+*.log
+
+# 鎖定檔案
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# 配置檔案
+*.config.js
+*.config.ts
+
+# 其他要忽略的特定檔案
+.eslintrc
+.prettierrc
+
+# 自動生成的檔案
+*.min.js
+*.min.css
+auto-imports.d.ts
