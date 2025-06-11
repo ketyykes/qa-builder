@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
@@ -123,6 +123,35 @@ function addNewOptionNode() {
     position: { x: Math.random() * 300 + 50, y: Math.random() * 200 + 50 },
   })
 }
+
+function handleDeleteNode() {
+  if (selectedNode.value) {
+    const nodeId = selectedNode.value.id
+    const nodeText = selectedNode.value.text
+
+    // 確認刪除
+    if (confirm(`確定要刪除節點「${nodeText}」嗎？此操作無法復原。`)) {
+      flowStore.deleteNode({ nodeId })
+      selectedNode.value = null // 清除選擇狀態
+    }
+  }
+}
+
+// 鍵盤事件處理
+function handleKeyDown(event) {
+  if (event.key === 'Delete' && selectedNode.value) {
+    handleDeleteNode()
+  }
+}
+
+// 綁定鍵盤事件
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown)
+})
 </script>
 <template>
   <div class="flex h-screen">
@@ -239,12 +268,20 @@ function addNewOptionNode() {
           </div>
         </div>
 
-        <Button
-          label="儲存變更"
-          icon="pi pi-save"
-          class="p-button-sm mt-4"
-          @click="saveNodeChanges"
-        />
+        <div class="mt-4 flex space-x-2">
+          <Button
+            label="儲存變更"
+            icon="pi pi-save"
+            class="p-button-sm flex-1"
+            @click="saveNodeChanges"
+          />
+          <Button
+            label="刪除節點"
+            icon="pi pi-trash"
+            class="p-button-sm p-button-danger"
+            @click="handleDeleteNode"
+          />
+        </div>
       </div>
       <p v-else class="mt-2 text-sm text-gray-600">
         選取一個節點以編輯其屬性。

@@ -71,11 +71,10 @@ export const useFlowStore = defineStore('flow', () => {
         position,
       })
     } else {
-      console.error('無效的節點類型:', type)
+      console.error('無效的節點類型：', type)
       return
     }
 
-    // @ts-ignore
     nodes.value.push(newNode)
   }
 
@@ -123,7 +122,7 @@ export const useFlowStore = defineStore('flow', () => {
    */
   function addOptionToNode({ nodeId, optionText = '新選項' }) {
     const nodeToUpdate = nodes.value.find((node) => node.id === nodeId)
-    // @ts-ignore
+
     if (nodeToUpdate && nodeToUpdate.type === 'option') {
       /** @type {Option} */
       const newOption = {
@@ -131,9 +130,7 @@ export const useFlowStore = defineStore('flow', () => {
         text: optionText,
         // nextQuestionId will be set when connecting edges
       }
-      // @ts-ignore
       if (!nodeToUpdate.options) {
-        // @ts-ignore
         nodeToUpdate.options = []
       }
       // @ts-ignore
@@ -172,7 +169,30 @@ export const useFlowStore = defineStore('flow', () => {
     }
   }
 
-  // TODO: Add actions for deleting nodes, adding/removing edges, etc.
+  /**
+   * Deletes a node and all its related edges from the store.
+   *
+   * @param {object} payload
+   * @param {string} payload.nodeId - The ID of the node to delete.
+   */
+  function deleteNode({ nodeId }) {
+    // Find the index of the node to delete
+    const nodeIndex = nodes.value.findIndex((node) => node.id === nodeId)
+    if (nodeIndex === -1) {
+      console.warn(`Node with id ${nodeId} not found for deletion.`)
+      return
+    }
+
+    // Remove the node from the nodes array
+    nodes.value.splice(nodeIndex, 1)
+
+    // Remove all edges that connect to or from this node
+    edges.value = edges.value.filter(
+      (edge) => edge.sourceId !== nodeId && edge.targetId !== nodeId,
+    )
+
+    console.log(`Node ${nodeId} and its related edges have been deleted.`)
+  }
 
   return {
     nodes,
@@ -181,7 +201,8 @@ export const useFlowStore = defineStore('flow', () => {
     addNode,
     updateNodePosition,
     updateNodeText,
-    addOptionToNode, // Export the new action
+    addOptionToNode,
     updateOptionText,
+    deleteNode, // Export the new delete action
   }
 })

@@ -50,25 +50,41 @@
 export function transformToVueFlowElements(flowData) {
   const vueFlowNodes = flowData.nodes.map((internalNode) => {
     let nodeTypeForVueFlow = ''
+    let displayLabel = ''
+
     switch (internalNode.type) {
       case 'question':
-        nodeTypeForVueFlow = 'questionNode'
+        nodeTypeForVueFlow = 'default' // 使用 Vue Flow 的預設節點樣式
+        displayLabel = internalNode.text
         break
-      case 'option':
-        nodeTypeForVueFlow = 'optionNode'
+      case 'option': {
+        nodeTypeForVueFlow = 'default' // 使用 Vue Flow 的預設節點樣式
+        const optionCount = internalNode.options
+          ? internalNode.options.length
+          : 0
+        displayLabel = `${internalNode.text} (${optionCount}個選項)`
         break
+      }
       default:
         // @ts-ignore
         console.warn(`未知節點類型：${internalNode.type}`)
         nodeTypeForVueFlow = 'default'
+        // @ts-ignore
+        displayLabel = internalNode.text
     }
 
     return {
       id: internalNode.id,
       type: nodeTypeForVueFlow,
       position: internalNode.position,
-      // @ts-ignore
-      data: { text: internalNode.text },
+
+      data: {
+        text: internalNode.text,
+        nodeType: internalNode.type,
+        options:
+          internalNode.type === 'option' ? internalNode.options || [] : [],
+      },
+      label: displayLabel, // 這樣 Vue Flow 就會顯示節點文字
     }
   })
 
