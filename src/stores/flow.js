@@ -104,7 +104,6 @@ export const useFlowStore = defineStore('flow', () => {
   function updateNodeText({ nodeId, newText }) {
     const nodeToUpdate = nodes.value.find((node) => node.id === nodeId)
     if (nodeToUpdate) {
-      // @ts-ignore
       nodeToUpdate.text = newText
     } else {
       console.warn(`Node with id ${nodeId} not found for text update.`)
@@ -133,7 +132,6 @@ export const useFlowStore = defineStore('flow', () => {
       if (!nodeToUpdate.options) {
         nodeToUpdate.options = []
       }
-      // @ts-ignore
       nodeToUpdate.options.push(newOption)
     } else {
       console.warn(
@@ -153,7 +151,6 @@ export const useFlowStore = defineStore('flow', () => {
   function updateOptionText({ nodeId, optionId, newText }) {
     const nodeToUpdate = nodes.value.find((node) => node.id === nodeId)
     if (nodeToUpdate && nodeToUpdate.type === 'option') {
-      // @ts-ignore
       const optionToUpdate = nodeToUpdate.options?.find(
         (opt) => opt.id === optionId,
       )
