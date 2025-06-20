@@ -132,7 +132,12 @@ function getCurrentOptions() {
   const optionNodeId = outgoingEdges[0].targetId
   const optionNode = flowStore.nodes.find((node) => node.id === optionNodeId)
 
-  return optionNode?.options || []
+  // Type guard: 確保是選項節點才存取 options 屬性
+  if (optionNode && optionNode.type === 'option') {
+    return optionNode.options || []
+  }
+
+  return []
 }
 </script>
 
