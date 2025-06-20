@@ -1,4 +1,6 @@
 <script setup>
+import { computed } from 'vue'
+
 import { Handle, Position } from '@vue-flow/core'
 
 const props = defineProps({
@@ -8,9 +10,9 @@ const props = defineProps({
   },
 })
 
-// 從 data 中取得選項資料
-const options = props.data?.options || []
-const nodeText = props.data?.text || ''
+// 使用 computed 讓資料響應式地更新
+const options = computed(() => props.data?.options || [])
+const nodeText = computed(() => props.data?.text || '新選項節點')
 </script>
 
 <template>

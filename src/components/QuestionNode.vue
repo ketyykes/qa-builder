@@ -1,4 +1,6 @@
 <script setup>
+import { computed } from 'vue'
+
 import { Handle, Position } from '@vue-flow/core'
 
 const props = defineProps({
@@ -8,7 +10,8 @@ const props = defineProps({
   },
 })
 
-const nodeText = props.data?.text || ''
+// 使用 computed 讓 nodeText 響應式地更新
+const nodeText = computed(() => props.data?.text || '新問題節點')
 </script>
 
 <template>
