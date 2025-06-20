@@ -1,7 +1,15 @@
+// @ts-check
 import { computed } from 'vue'
 
 import { useFlowStore } from '@/stores/flow'
 
+/** @import {UseFlowStatsReturn} from '@/types/composables.d' */
+
+/**
+ * 取得流程統計資料的 composable
+ *
+ * @type {() => UseFlowStatsReturn}
+ */
 export function useFlowStats() {
   const flowStore = useFlowStore()
 

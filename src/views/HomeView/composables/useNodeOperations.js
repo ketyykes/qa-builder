@@ -1,13 +1,26 @@
+// @ts-check
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 
 import { useFlowStore } from '../../../stores/flow'
 
+/** @import {UseNodeOperationsReturn} from '@/types/composables.d' */
+
+/**
+ * 節點操作功能的 composable
+ *
+ * @type {() => UseNodeOperationsReturn}
+ */
 export function useNodeOperations() {
   const flowStore = useFlowStore()
   const confirm = useConfirm()
   const toast = useToast()
 
+  /**
+   * 新增問句節點
+   *
+   * @type {() => void}
+   */
   function addNewQuestionNode() {
     flowStore.addNode({
       type: 'question',
@@ -16,6 +29,11 @@ export function useNodeOperations() {
     })
   }
 
+  /**
+   * 新增選項節點
+   *
+   * @type {() => void}
+   */
   function addNewOptionNode() {
     flowStore.addNode({
       type: 'option',
@@ -24,6 +42,16 @@ export function useNodeOperations() {
     })
   }
 
+  /**
+   * 處理刪除節點
+   *
+   * @type {(
+   *   selectedNode: import('vue').Ref<
+   *     import('@/types/flow.d').FlowNode | null
+   *   >,
+   *   clearSelectionCallback: () => void,
+   * ) => void}
+   */
   function handleDeleteNode(selectedNode, clearSelectionCallback) {
     if (selectedNode.value) {
       const nodeId = selectedNode.value.id
@@ -46,6 +74,16 @@ export function useNodeOperations() {
     }
   }
 
+  /**
+   * 處理刪除邊
+   *
+   * @type {(
+   *   selectedEdge: import('vue').Ref<
+   *     import('@/types/flow.d').FlowEdge | null
+   *   >,
+   *   clearSelectionCallback: () => void,
+   * ) => void}
+   */
   function handleDeleteEdge(selectedEdge, clearSelectionCallback) {
     if (selectedEdge.value) {
       const edgeId = selectedEdge.value.id
@@ -66,6 +104,17 @@ export function useNodeOperations() {
     }
   }
 
+  /**
+   * 儲存節點變更
+   *
+   * @type {(
+   *   selectedNode: import('vue').Ref<
+   *     import('@/types/flow.d').FlowNode | null
+   *   >,
+   *   editableNodeText: import('vue').Ref<string>,
+   *   editableOptionMainText: import('vue').Ref<string>,
+   * ) => void}
+   */
   function saveNodeChanges(
     selectedNode,
     editableNodeText,
@@ -101,8 +150,14 @@ export function useNodeOperations() {
   }
 
   /**
-   * @param {import('vue').Ref<import('@vue-flow/core').GraphNode>} selectedNode
-   * @param {import('vue').Ref<string>}                             newOptionText
+   * 處理新增選項功能
+   *
+   * @type {(
+   *   selectedNode: import('vue').Ref<
+   *     import('@/types/flow.d').FlowNode | null
+   *   >,
+   *   newOptionText: import('vue').Ref<string>,
+   * ) => void}
    */
   function handleAddNewOption(selectedNode, newOptionText) {
     if (
@@ -132,6 +187,11 @@ export function useNodeOperations() {
     }
   }
 
+  /**
+   * 清空所有節點
+   *
+   * @type {(clearSelectionCallback: () => void) => void}
+   */
   function clearAllNodes(clearSelectionCallback) {
     confirm.require({
       message: '確定要清空所有節點和連線嗎？此操作無法復原。',
@@ -150,10 +210,20 @@ export function useNodeOperations() {
     })
   }
 
+  /**
+   * 處理連線
+   *
+   * @type {(params: any) => void}
+   */
   function handleConnect(params) {
     flowStore.onConnect(params)
   }
 
+  /**
+   * 處理節點變更
+   *
+   * @type {(changes: any[]) => void}
+   */
   function handleNodesChange(changes) {
     changes.forEach((change) => {
       if (change.type === 'position' && change.position) {

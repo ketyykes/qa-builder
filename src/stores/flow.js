@@ -5,20 +5,15 @@ import { defineStore } from 'pinia'
 import { transformToVueFlowElements } from '../utils/flow-transformer.js'
 
 /**
- * @typedef {import('../types/flow.d').FlowNode}     FlowNode
- *
- * @typedef {import('../types/flow.d').FlowEdge}     FlowEdge
- *
- * @typedef {import('../types/flow.d').NodePosition} NodePosition
- *
- * @typedef {import('../types/flow.d').QuestionNode} QuestionNode
- *
- * @typedef {import('../types/flow.d').OptionNode}   OptionNode
- *
- * @typedef {import('../types/flow.d').Option}       Option
- *
- * @typedef {'question' | 'option'}                  NodeType
+ * @import {FlowNode,
+ *   FlowEdge,
+ *   NodePosition,
+ *   QuestionNode,
+ *   OptionNode,
+ *   Option} from '../types/flow.d'
  */
+
+/** @typedef {'question' | 'option'} NodeType */
 
 let nodeIdCounter = 0
 const getNextNodeId = () => `node_${nodeIdCounter++}`
@@ -41,14 +36,13 @@ export const useFlowStore = defineStore('flow', () => {
   })
 
   /**
-   * Adds a new node to the store.
+   * 新增節點到 store
    *
-   * @param {object}       payload
-   * @param {NodeType}     payload.type       - The type of the node ('question'
-   *   or 'option').
-   * @param {string}       [payload.text]     - The initial text for the node.
-   * @param {NodePosition} [payload.position] - The initial position of the
-   *   node.
+   * @type {(payload: {
+   *   type: NodeType
+   *   text?: string
+   *   position?: NodePosition
+   * }) => void}
    */
   function addNode({ type, text = '', position = { x: 100, y: 100 } }) {
     const newNodeId = getNextNodeId()
@@ -79,11 +73,9 @@ export const useFlowStore = defineStore('flow', () => {
   }
 
   /**
-   * Updates the position of a node in the store.
+   * 更新節點位置
    *
-   * @param {object}       payload
-   * @param {string}       payload.nodeId   - The ID of the node to update.
-   * @param {NodePosition} payload.position - The new position of the node.
+   * @type {(payload: { nodeId: string; position: NodePosition }) => void}
    */
   function updateNodePosition({ nodeId, position }) {
     const nodeToUpdate = nodes.value.find((node) => node.id === nodeId)

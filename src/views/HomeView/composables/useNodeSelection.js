@@ -2,6 +2,13 @@ import { ref, watch } from 'vue'
 
 import { useFlowStore } from '../../../stores/flow'
 
+/** @import {UseNodeSelectionReturn} from '@/types/composables.d' */
+
+/**
+ * 節點選擇功能的 composable
+ *
+ * @type {() => UseNodeSelectionReturn}
+ */
 export function useNodeSelection() {
   const flowStore = useFlowStore()
   const selectedNode = ref(null)
@@ -35,6 +42,11 @@ export function useNodeSelection() {
     }
   })
 
+  /**
+   * 處理節點點擊事件
+   *
+   * @type {(event: { node: { id: string; data?: any } }) => void}
+   */
   function handleNodeClick(event) {
     const storeNode = flowStore.nodes.find((n) => n.id === event.node.id)
     if (storeNode) {
@@ -48,11 +60,21 @@ export function useNodeSelection() {
     }
   }
 
+  /**
+   * 處理邊點擊事件
+   *
+   * @type {(event: { edge: import('@/types/flow.d').FlowEdge }) => void}
+   */
   function handleEdgeClick(event) {
     selectedEdge.value = event.edge
     selectedNode.value = null
   }
 
+  /**
+   * 清除選擇狀態
+   *
+   * @type {() => void}
+   */
   function clearSelection() {
     selectedNode.value = null
     selectedEdge.value = null

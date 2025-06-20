@@ -1,11 +1,24 @@
+// @ts-check
 import { useToast } from 'primevue/usetoast'
 
 import { useFlowStore } from '../../../stores/flow'
 
+/** @import {UseFileOperationsReturn} from '@/types/composables.d' */
+
+/**
+ * 檔案操作功能的 composable
+ *
+ * @type {() => UseFileOperationsReturn}
+ */
 export function useFileOperations() {
   const flowStore = useFlowStore()
   const toast = useToast()
 
+  /**
+   * 匯出流程檔案
+   *
+   * @type {() => void}
+   */
   function exportFlow() {
     try {
       // 檢查是否有內容可以匯出
@@ -59,7 +72,11 @@ export function useFileOperations() {
     }
   }
 
-  /** @param {() => void} clearSelectionCallback */
+  /**
+   * 匯入流程檔案
+   *
+   * @type {(clearSelectionCallback: () => void) => void}
+   */
   function importFlow(clearSelectionCallback) {
     const input = document.createElement('input')
     input.type = 'file'
@@ -106,66 +123,36 @@ export function useFileOperations() {
       const reader = new FileReader()
       reader.onload = (e) => {
         try {
-          const jsonString = e.target.result
-
-          // 顯示載入中訊息
-          console.log('開始匯入流程檔案：', file.name)
-
-          // Type guard: 確保 jsonString 是 string 型別
-          if (typeof jsonString !== 'string') {
-            toast.add({
-              severity: 'error',
-              summary: '檔案讀取錯誤',
-              detail: '檔案內容格式異常，無法解析為文字格式。',
-              life: 5000,
-            })
-            return
+          if (!e.target?.result) {
+            throw new Error('檔案讀取失敗')
           }
 
-          const success = flowStore.importNodeGraph(jsonString)
+          const jsonContent = e.target.result.toString()
+          const success = flowStore.importNodeGraph(jsonContent)
 
           if (success) {
-            // 清除選擇狀態
             clearSelectionCallback()
-
-            // 顯示詳細的成功訊息
-            const nodeCount = flowStore.nodes.length
-            const edgeCount = flowStore.edges.length
-            const questionNodes = flowStore.nodes.filter(
-              (n) => n.type === 'question',
-            ).length
-            const optionNodes = flowStore.nodes.filter(
-              (n) => n.type === 'option',
-            ).length
-
-            console.log('Flow imported successfully:', {
-              fileName: file.name,
-              nodeCount,
-              edgeCount,
-              questionNodes,
-              optionNodes,
-            })
-
             toast.add({
               severity: 'success',
               summary: '匯入成功',
-              detail: `檔案名稱：${file.name}\n匯入 ${nodeCount} 個節點（${questionNodes} 個問句，${optionNodes} 個選項）和 ${edgeCount} 個連線`,
-              life: 8000,
+              detail: `已成功匯入流程檔案：${file.name}`,
+              life: 5000,
             })
+            console.log('Flow imported successfully from:', file.name)
           } else {
             toast.add({
               severity: 'error',
               summary: '匯入失敗',
-              detail: `JSON 格式不正確或檔案內容無效。請確認檔案是由 QA Builder 匯出的有效 JSON 格式。`,
-              life: 8000,
+              detail: '檔案格式不正確或包含無效資料，請檢查檔案內容。',
+              life: 7000,
             })
           }
         } catch (error) {
-          console.error('Failed to import flow:', error)
+          console.error('Import error:', error)
           toast.add({
             severity: 'error',
             summary: '匯入失敗',
-            detail: `檔案解析錯誤：${error.message}。請檢查檔案是否完整且格式正確。`,
+            detail: `檔案解析錯誤：${error.message}。請確認檔案格式正確。`,
             life: 8000,
           })
         }
@@ -175,12 +162,12 @@ export function useFileOperations() {
         toast.add({
           severity: 'error',
           summary: '檔案讀取失敗',
-          detail: `無法讀取檔案 ${file.name}`,
+          detail: '無法讀取選擇的檔案，請重試。',
           life: 5000,
         })
       }
 
-      reader.readAsText(file, 'UTF-8')
+      reader.readAsText(file)
     }
 
     input.click()

@@ -2,55 +2,24 @@
 import { Position } from '@vue-flow/core'
 
 /**
- * @typedef {import('../types/flow.d').FlowData}     FlowData
- *
- * @typedef {import('../types/flow.d').FlowNode}     InternalFlowNode
- *
- * @typedef {import('../types/flow.d').FlowEdge}     InternalFlowEdge
- *
- * @typedef {import('../types/flow.d').NodePosition} NodePosition
- *
- * @typedef {import('../types/flow.d').QuestionNode} QuestionNode
- *
- * @typedef {import('../types/flow.d').OptionNode}   OptionNode
+ * @import {FlowData,
+ *   FlowNode as InternalFlowNode,
+ *   FlowEdge as InternalFlowEdge,
+ *   NodePosition,
+ *   QuestionNode,
+ *   OptionNode} from '../types/flow.d'
  */
 
 /**
- * Vue Flow 節點的簡化介面
- *
- * @typedef  {object}                 VueFlowNode
- * @property {string}                 id
- * @property {string}                 type             - 用於指定自訂節點組件的類型
- * @property {NodePosition}           position
- * @property {{ text: string } | any} data             - 儲存節點的特定資料，例如文字內容，any
- *   用於彈性
- * @property {string}                 [label]          - 節點顯示的標籤
- * @property {Position}               [sourcePosition] - 連線起點位置
- * @property {Position}               [targetPosition] - 連線終點位置
+ * @import {VueFlowNode,
+ *   VueFlowEdge,
+ *   VueFlowElements} from '../types/vue-flow.d'
  */
 
 /**
- * Vue Flow 邊的簡化介面
+ * 將我們內部的 FlowData 格式轉換為 Vue Flow 元件所需的格式
  *
- * @typedef  {object} VueFlowEdge
- * @property {string} id
- * @property {string} source         - 起點節點 ID
- * @property {string} target         - 終點節點 ID
- * @property {string} [sourceHandle]
- * @property {string} [targetHandle]
- */
-
-/**
- * @typedef  {object}        VueFlowElements
- * @property {VueFlowNode[]} nodes
- * @property {VueFlowEdge[]} edges
- */
-
-/**
- * 將我們內部的 FlowData 格式轉換為 Vue Flow 元件所需的格式。
- *
- * @param   {FlowData}        flowData - 內部儲存的流程圖資料。
- * @returns {VueFlowElements}          供 Vue Flow 使用的節點和邊的物件。
+ * @type {(flowData: FlowData) => VueFlowElements}
  */
 export function transformToVueFlowElements(flowData) {
   const vueFlowNodes = flowData.nodes.map((internalNode) => {

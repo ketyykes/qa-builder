@@ -1,0 +1,125 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Cursor Rules: 使用 TypeScript 風格的 JSDoc
+
+> **目的**：讓 Cursor 產生的 JavaScript／Vue 程式碼在撰寫 JSDoc 時，一律採用 **TypeScript 風格**，避免傳統 `@param`／`@returns` 標籤，並符合臺灣常用術語（如「函式」「資料」「陣列」「物件」「變數」）。
+
+
+
+## 1️⃣ 核心原則
+
+1. **只用 `@type`／`@typedef`／`@import`** 來標註型別；**嚴禁**出現 `@param`、`@returns`、`@prop` 等傳統 JSDoc 標籤。
+2. 函式型別一律以 **「箭頭函式簽名」** 描述，格式：
+
+   ```js
+   /** @type {(arg1: Arg1Type, arg2?: Arg2Type) => ReturnType} */
+   ```
+3. 變數、常數若為 **陣列**、**物件**、**函式** 等複雜型別，皆須明確標註型別。
+4. 若型別已定義於 `.d.ts` 檔，必須使用 `import()` 或 `@import` 引入；**不得**重複宣告。
+5. 所有註解、範例、命名與敘述均採 **繁體中文（臺灣用語）**，程式碼中的識別字則維持 **英文命名**。
+
+---
+
+## 2️⃣ 常用範例速查
+
+### 2.1 函式
+
+| 需求                                 | 範例     |
+| ------------------------------------ | -------- |
+| 有參數、無回傳值                     | \`\`\`js |
+| /\*\* @type {(dog: Dog) => void} \*/ |          |
+| const printDogInfo = (dog) => {      |          |
+| console.log(dog.name);               |          |
+| };                                   |          |
+
+````|
+| 有參數、有回傳值 | ```js
+/** @type {(weight: number, height: number) => number} */
+const calculateBMI = (weight, height) => weight / (height * height);
+``` |
+
+### 2.2 陣列 & 物件
+
+```js
+/** @type {string[]} */
+const dogNames = ['小黑', '球球', '毛毛'];
+
+/** @type {{ id: string, name: string, age?: number }} */
+const dog = { id: 'd1', name: '球球' };
+````
+
+### 2.3 引入外部 `.d.ts` 型別
+
+*單一型別：*
+
+```js
+/** @typedef {import('./types').User} User */
+/** @type {User} */
+const user = { name: 'Danny', age: 30 };
+```
+
+*多型別：*
+
+```js
+/** @import {
+ *   Animal,
+ *   UpdateAnimalPayload,
+ *   QueryAnimalApiResponse
+ * } from '@/types/animal.d' */
+```
+
+### 2.4 型別守衛 (Type Guard)
+
+```js
+import axios from 'axios';
+
+/**
+ * @typedef {{ message: string }} SuccessResult
+ * @typedef {{ errorCode: number }} FailResult
+ * @typedef {SuccessResult | FailResult} ApiResult
+ */
+
+/**
+ * 型別守衛：判斷是否為成功回應
+ * @type {(res: import('axios').AxiosResponse<ApiResult>) =>
+ *        res is import('axios').AxiosResponse<SuccessResult>} */
+const isSuccess = (res) => 'message' in res.data;
+```
+
+### 2.5 Vue `<script setup>`
+
+```vue
+<script setup>
+/**
+ * defineProps JSDoc 型別標註
+ */
+const props = defineProps({
+  items: {
+    /** @type {import('vue').PropType<(File & { previewURL?: string })[]>} */
+    type: Array,
+    default: () => [],
+  },
+});
+</script>
+```
+
+---
+
+## 3️⃣ 建議撰寫時機
+
+1. **複雜資料結構**：多層巢狀或有可選欄位，請用 `type`／`interface` 命名集中管理。
+2. **API 請求／回應**：後端 JSON 欄位多且重複使用時，一律先定義型別再撰寫呼叫函式。
+3. **共用工具函式**：清楚標示「函式名稱 + 參數型別 + 回傳型別」，提高呼叫準確率。
+
+---
+
+## 4️⃣ 檢查清單 (Checklist)
+
+* [ ] 是否全部使用 TypeScript 風格 JSDoc？
+* [ ] 是否完全避免 @param/@returns？
+* [ ] 外部型別是否透過 import() 或 @import 引入？
+* [ ] 中文敘述是否使用臺灣常見用語？
+* [ ] 型別命名是否保持英文且具描述性？

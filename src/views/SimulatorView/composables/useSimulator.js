@@ -1,7 +1,16 @@
+// @ts-check
 import { computed, ref } from 'vue'
 
 import { useFlowStore } from '@/stores/flow'
 
+/** @import {UseSimulatorReturn} from '@/types/composables.d' */
+/** @import {Option} from '@/types/flow.d' */
+
+/**
+ * 模擬器功能的 composable
+ *
+ * @type {() => UseSimulatorReturn}
+ */
 export function useSimulator() {
   const flowStore = useFlowStore()
 
@@ -32,7 +41,11 @@ export function useSimulator() {
     return flowStore.nodes.length > 0
   })
 
-  // 開始模擬
+  /**
+   * 開始模擬功能
+   *
+   * @type {() => void}
+   */
   function startSimulation() {
     if (!startNode.value) {
       errorMessage.value =
@@ -50,7 +63,11 @@ export function useSimulator() {
     addToHistory('question', startNode.value.text)
   }
 
-  // 重新開始
+  /**
+   * 重新開始模擬
+   *
+   * @type {() => void}
+   */
   function restartSimulation() {
     currentNodeId.value = null
     isStarted.value = false
@@ -59,7 +76,11 @@ export function useSimulator() {
     errorMessage.value = ''
   }
 
-  // 選擇選項
+  /**
+   * 選擇選項
+   *
+   * @type {(option: Option) => void}
+   */
   function selectOption(option) {
     if (!option) return
 
@@ -84,13 +105,21 @@ export function useSimulator() {
     }
   }
 
-  // 完成模擬
+  /**
+   * 完成模擬
+   *
+   * @type {(message: string) => void}
+   */
   function completeSimulation(message) {
     isCompleted.value = true
     addToHistory('result', message)
   }
 
-  // 添加到對話歷史
+  /**
+   * 添加到對話歷史
+   *
+   * @type {(type: 'question' | 'answer' | 'result', text: string) => void}
+   */
   function addToHistory(type, text) {
     conversationHistory.value.push({
       type, // 'question', 'answer', 'result'
@@ -99,7 +128,11 @@ export function useSimulator() {
     })
   }
 
-  // 找到當前問題對應的選項節點
+  /**
+   * 找到當前問題對應的選項節點
+   *
+   * @type {() => Option[]}
+   */
   function getCurrentOptions() {
     if (!currentNode.value || currentNode.value.type !== 'question') return []
 
@@ -122,7 +155,11 @@ export function useSimulator() {
     return []
   }
 
-  // 初始化檢查
+  /**
+   * 初始化檢查
+   *
+   * @type {() => void}
+   */
   function initializeSimulator() {
     if (!hasFlowData.value) {
       errorMessage.value = '尚未建立任何流程，請先回到編輯器建立問答流程。'
