@@ -1,0 +1,66 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "exportDate": "2024-01-01T00:00:00.000Z",
+    "nodeCount": 3,
+    "edgeCount": 2
+  },
+  "nodes": [
+    {
+      "id": "node_0",
+      "type": "question",
+      "text": "您今天感覺如何？",
+      "position": {
+        "x": 250,
+        "y": 100
+      }
+    },
+    {
+      "id": "node_1",
+      "type": "option",
+      "text": "回答選項",
+      "options": [
+        {
+          "id": "opt_0",
+          "text": "很好",
+          "nextQuestionId": "node_2"
+        },
+        {
+          "id": "opt_1",
+          "text": "普通"
+        },
+        {
+          "id": "opt_2",
+          "text": "不太好",
+          "nextQuestionId": "node_2"
+        }
+      ],
+      "position": {
+        "x": 250,
+        "y": 300
+      }
+    },
+    {
+      "id": "node_2",
+      "type": "question",
+      "text": "需要更多協助嗎？",
+      "position": {
+        "x": 500,
+        "y": 200
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_node_0_to_node_1",
+      "sourceId": "node_0",
+      "targetId": "node_1"
+    },
+    {
+      "id": "edge_node_1_to_node_2",
+      "sourceId": "node_1",
+      "targetId": "node_2",
+      "sourceHandle": "opt_0"
+    }
+  ]
+}

@@ -10,14 +10,23 @@ import { VueFlow } from '@vue-flow/core'
 import '@vue-flow/core/dist/style.css'
 import '@vue-flow/core/dist/theme-default.css'
 
+import OptionNode from '../../components/OptionNode.vue'
+import QuestionNode from '../../components/QuestionNode.vue'
 import { useFlowStore } from '../../stores/flow'
 
 const flowStore = useFlowStore()
 
 const selectedNode = ref(null)
+const selectedEdge = ref(null)
 const editableNodeText = ref('')
 const editableOptionMainText = ref('')
 const newOptionText = ref('') // For adding new options to an OptionNode
+
+// Define custom node types
+const nodeTypes = {
+  questionNode: QuestionNode,
+  optionNode: OptionNode,
+}
 
 watch(selectedNode, (currentNode) => {
   if (currentNode) {
@@ -48,12 +57,18 @@ function handleNodeClick(event) {
   const storeNode = flowStore.nodes.find((n) => n.id === event.node.id)
   if (storeNode) {
     selectedNode.value = storeNode
+    selectedEdge.value = null // Clear edge selection when selecting a node
   } else {
     selectedNode.value = null
     console.error(
       `Critical: Clicked node with ID ${event.node.id} not found in Pinia store.`,
     )
   }
+}
+
+function handleEdgeClick(event) {
+  selectedEdge.value = event.edge
+  selectedNode.value = null // Clear node selection when selecting an edge
 }
 
 function saveNodeChanges() {
@@ -137,10 +152,28 @@ function handleDeleteNode() {
   }
 }
 
+function handleDeleteEdge() {
+  if (selectedEdge.value) {
+    const edgeId = selectedEdge.value.id
+    if (confirm(`確定要刪除此連線嗎？此操作無法復原。`)) {
+      flowStore.removeEdge({ edgeId })
+      selectedEdge.value = null // Clear selection after deletion
+    }
+  }
+}
+
+function handleConnect(params) {
+  flowStore.onConnect(params)
+}
+
 // 鍵盤事件處理
 function handleKeyDown(event) {
-  if (event.key === 'Delete' && selectedNode.value) {
-    handleDeleteNode()
+  if (event.key === 'Delete') {
+    if (selectedNode.value) {
+      handleDeleteNode()
+    } else if (selectedEdge.value) {
+      handleDeleteEdge()
+    }
   }
 }
 
@@ -152,24 +185,143 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown)
 })
+
+function handleNodesChange(changes) {
+  // 處理節點變化，特別是位置移動
+  changes.forEach((change) => {
+    if (change.type === 'position' && change.position) {
+      // 同步位置變化到 Pinia store
+      flowStore.updateNodePosition({
+        nodeId: change.id,
+        position: change.position,
+      })
+    }
+  })
+}
+
+// 儲存/載入功能
+function exportFlow() {
+  try {
+    const jsonData = flowStore.exportNodeGraph()
+    const blob = new Blob([jsonData], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `qa-flow-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    URL.revokeObjectURL(url)
+    console.log('Flow exported successfully')
+  } catch (error) {
+    console.error('Failed to export flow:', error)
+    alert('匯出失敗，請稍後再試。')
+  }
+}
+
+function importFlow() {
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = '.json'
+
+  input.onchange = (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const jsonString = e.target.result
+        const success = flowStore.importNodeGraph(jsonString)
+
+        if (success) {
+          // 清除選擇狀態
+          selectedNode.value = null
+          selectedEdge.value = null
+          console.log('Flow imported successfully')
+          alert('流程匯入成功！')
+        } else {
+          alert('匯入失敗：JSON 格式不正確。')
+        }
+      } catch (error) {
+        console.error('Failed to import flow:', error)
+        alert('匯入失敗：檔案格式錯誤。')
+      }
+    }
+
+    reader.readAsText(file)
+  }
+
+  input.click()
+}
+
+function clearAllNodes() {
+  if (confirm('確定要清空所有節點和連線嗎？此操作無法復原。')) {
+    flowStore.clearAll()
+    selectedNode.value = null
+    selectedEdge.value = null
+    console.log('All nodes and edges cleared')
+  }
+}
 </script>
 <template>
   <div class="flex h-screen">
     <!-- Left Toolbar -->
     <div class="flex w-1/4 flex-col space-y-4 bg-gray-200 p-4">
       <h2 class="mb-4 text-xl font-semibold">工具欄</h2>
-      <Button
-        label="新增問句節點"
-        icon="pi pi-plus"
-        class="p-button-sm"
-        @click="addNewQuestionNode"
-      />
-      <Button
-        label="新增選項節點"
-        icon="pi pi-plus"
-        class="p-button-sm p-button-secondary"
-        @click="addNewOptionNode"
-      />
+
+      <!-- 節點新增區域 -->
+      <div class="space-y-2">
+        <h3 class="text-sm font-medium text-gray-700">新增節點</h3>
+        <Button
+          label="新增問句節點"
+          icon="pi pi-plus"
+          class="p-button-sm w-full"
+          @click="addNewQuestionNode"
+        />
+        <Button
+          label="新增選項節點"
+          icon="pi pi-plus"
+          class="p-button-sm p-button-secondary w-full"
+          @click="addNewOptionNode"
+        />
+      </div>
+
+      <!-- 分隔線 -->
+      <hr class="border-gray-300" />
+
+      <!-- 檔案操作區域 -->
+      <div class="space-y-2">
+        <h3 class="text-sm font-medium text-gray-700">檔案操作</h3>
+        <Button
+          label="匯出流程"
+          icon="pi pi-download"
+          class="p-button-sm w-full"
+          @click="exportFlow"
+        />
+        <Button
+          label="匯入流程"
+          icon="pi pi-upload"
+          class="p-button-sm w-full"
+          @click="importFlow"
+        />
+      </div>
+
+      <!-- 分隔線 -->
+      <hr class="border-gray-300" />
+
+      <!-- 危險操作區域 -->
+      <div class="space-y-2">
+        <h3 class="text-sm font-medium text-red-700">危險操作</h3>
+        <Button
+          label="清空全部"
+          icon="pi pi-trash"
+          class="p-button-sm p-button-danger w-full"
+          @click="clearAllNodes"
+        />
+      </div>
     </div>
 
     <!-- Center Canvas Area -->
@@ -178,9 +330,16 @@ onUnmounted(() => {
       <VueFlow
         :nodes="flowStore.vueFlowElements.nodes"
         :edges="flowStore.vueFlowElements.edges"
+        :node-types="nodeTypes"
         fit-view-on-init
+        :nodes-connectable="true"
+        :edges-updatable="true"
+        :default-edge-options="{ type: 'default', updatable: true }"
         class="h-full w-full"
         @node-click="handleNodeClick"
+        @edge-click="handleEdgeClick"
+        @connect="handleConnect"
+        @nodes-change="handleNodesChange"
       >
       </VueFlow>
     </div>
@@ -285,6 +444,33 @@ onUnmounted(() => {
       </div>
       <p v-else class="mt-2 text-sm text-gray-600">
         選取一個節點以編輯其屬性。
+      </p>
+
+      <!-- Edge properties when an edge is selected -->
+      <div v-if="selectedEdge" class="mt-4 space-y-4">
+        <div>
+          <label class="text-sm font-medium">連線 ID:</label>
+          <p class="text-sm text-gray-700">{{ selectedEdge.id }}</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium">起點節點：</label>
+          <p class="text-sm text-gray-700">{{ selectedEdge.source }}</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium">終點節點：</label>
+          <p class="text-sm text-gray-700">{{ selectedEdge.target }}</p>
+        </div>
+        <div class="mt-4">
+          <Button
+            label="刪除連線"
+            icon="pi pi-trash"
+            class="p-button-sm p-button-danger w-full"
+            @click="handleDeleteEdge"
+          />
+        </div>
+      </div>
+      <p v-else-if="!selectedNode" class="mt-2 text-sm text-gray-600">
+        選取一個節點或連線以編輯其屬性。
       </p>
     </div>
   </div>

@@ -19,9 +19,13 @@
  *
  * @typedef  {object}                 VueFlowNode
  * @property {string}                 id
- * @property {string}                 type        - 用於指定自訂節點組件的類型
+ * @property {string}                 type             - 用於指定自訂節點組件的類型
  * @property {NodePosition}           position
- * @property {{ text: string } | any} data        - 儲存節點的特定資料，例如文字內容，any 用於彈性
+ * @property {{ text: string } | any} data             - 儲存節點的特定資料，例如文字內容，any
+ *   用於彈性
+ * @property {string}                 [label]          - 節點顯示的標籤
+ * @property {string}                 [sourcePosition] - 連線起點位置
+ * @property {string}                 [targetPosition] - 連線終點位置
  */
 
 /**
@@ -54,11 +58,11 @@ export function transformToVueFlowElements(flowData) {
 
     switch (internalNode.type) {
       case 'question':
-        nodeTypeForVueFlow = 'default' // 使用 Vue Flow 的預設節點樣式
+        nodeTypeForVueFlow = 'questionNode' // 使用自定義問句節點
         displayLabel = internalNode.text
         break
       case 'option': {
-        nodeTypeForVueFlow = 'default' // 使用 Vue Flow 的預設節點樣式
+        nodeTypeForVueFlow = 'optionNode' // 使用自定義選項節點
         const optionCount = internalNode.options
           ? internalNode.options.length
           : 0
@@ -73,11 +77,11 @@ export function transformToVueFlowElements(flowData) {
         displayLabel = internalNode.text
     }
 
-    return {
+    /** @type {VueFlowNode} */
+    const vueFlowNode = {
       id: internalNode.id,
       type: nodeTypeForVueFlow,
       position: internalNode.position,
-
       data: {
         text: internalNode.text,
         nodeType: internalNode.type,
@@ -86,12 +90,34 @@ export function transformToVueFlowElements(flowData) {
       },
       label: displayLabel, // 這樣 Vue Flow 就會顯示節點文字
     }
+
+    // Add connection handles for option nodes
+    if (internalNode.type === 'option' && internalNode.options) {
+      // Add source handles for each option
+      vueFlowNode.sourcePosition = 'right' // Options connect from the right
+
+      // Store option handles in data for custom rendering if needed
+      vueFlowNode.data.sourceHandles = internalNode.options.map((option) => ({
+        id: option.id,
+        type: 'source',
+        position: 'right',
+      }))
+    }
+
+    // Add target handle for question nodes
+    if (internalNode.type === 'question') {
+      vueFlowNode.targetPosition = 'left' // Questions receive connections from the left
+    }
+
+    return vueFlowNode
   })
 
   const vueFlowEdges = flowData.edges.map((internalEdge) => ({
     id: internalEdge.id,
     source: internalEdge.sourceId,
     target: internalEdge.targetId,
+    sourceHandle: internalEdge.sourceHandle,
+    targetHandle: internalEdge.targetHandle,
   }))
 
   return {
