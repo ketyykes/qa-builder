@@ -296,6 +296,17 @@ function importFlow() {
   input.accept = '.json'
 
   input.onchange = (event) => {
+    // Type guard: 確保 event.target 是 HTMLInputElement
+    if (!(event.target instanceof HTMLInputElement) || !event.target.files) {
+      toast.add({
+        severity: 'error',
+        summary: '檔案選擇錯誤',
+        detail: '無法取得選擇的檔案，請重試。',
+        life: 5000,
+      })
+      return
+    }
+
     const file = event.target.files[0]
     if (!file) return
 
@@ -329,6 +340,17 @@ function importFlow() {
 
         // 顯示載入中訊息
         console.log('開始匯入流程檔案：', file.name)
+
+        // Type guard: 確保 jsonString 是 string 型別
+        if (typeof jsonString !== 'string') {
+          toast.add({
+            severity: 'error',
+            summary: '檔案讀取錯誤',
+            detail: '檔案內容格式異常，無法解析為文字格式。',
+            life: 5000,
+          })
+          return
+        }
 
         const success = flowStore.importNodeGraph(jsonString)
 
