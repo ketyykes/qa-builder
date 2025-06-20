@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "homepage": "https://ketyykes.github.io/qa-builder/",
   "engines": {
     "node": "18.18.2",
     "pnpm": "9.15.9"
