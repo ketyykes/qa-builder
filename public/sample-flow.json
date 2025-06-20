@@ -1,9 +1,25 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "exportDate": "2024-01-01T00:00:00.000Z",
+    "exportDate": "2024-12-20T10:30:00.000Z",
+    "appName": "QA Builder",
+    "appVersion": "1.0.0",
     "nodeCount": 3,
-    "edgeCount": 2
+    "edgeCount": 2,
+    "statistics": {
+      "questionNodes": 2,
+      "optionNodes": 1,
+      "totalOptions": 3,
+      "isolatedNodes": 0,
+      "connectedNodes": 3
+    },
+    "flowProperties": {
+      "hasStartNode": true,
+      "hasEndNodes": true,
+      "maxDepth": null,
+      "tags": [],
+      "description": ""
+    }
   },
   "nodes": [
     {
