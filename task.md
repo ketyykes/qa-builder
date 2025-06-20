@@ -34,30 +34,30 @@
 
 ## 5️⃣ 連線操作功能
 
-* [ ] 啟用 Vue Flow edge 拖曳功能
-* [ ] 選項節點可連接至其他節點
-* [ ] 支援刪除節點連線
+* ✅ 啟用 Vue Flow edge 拖曳功能
+* ✅ 選項節點可連接至其他節點
+* ✅ 支援刪除節點連線
 
 ---
 
 ## 6️⃣ 儲存 / 載入功能
 
-* [ ] 建立匯出 JSON 的函式（`exportNodeGraph()`）
-* [ ] 建立載入 JSON 的函式（`importNodeGraph()`）
-* [ ] 將節點與連線資料儲存到 Pinia store
+* ✅ 建立匯出 JSON 的函式（`exportNodeGraph()`）
+* ✅ 建立載入 JSON 的函式（`importNodeGraph()`）
+* ✅ 將節點與連線資料儲存到 Pinia store
 
 ---
 
 ## 7️⃣ 問答流程模擬功能
 
-* [ ] 建立 `simulator` 頁面
-* [ ] 從 start node 開始模擬問答流程
-* [ ] 顯示選項並跳轉至對應節點
-* [ ] 遇到 end node 顯示結果訊息
+* ✅ 建立 `simulator` 頁面
+* ✅ 從 start node 開始模擬問答流程
+* ✅ 顯示選項並跳轉至對應節點
+* ✅ 遇到 end node 顯示結果訊息
 
 ---
 
-## 8️⃣ 匯出 JSON 檔案功能（代替第 9 項）
+## 8️⃣ 匯出 JSON 檔案功能
 
 * [ ] 提供使用者一鍵下載整個流程 JSON
 * [ ] 檔案格式符合實際可載入結構

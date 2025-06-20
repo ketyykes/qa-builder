@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
@@ -14,6 +15,7 @@ import OptionNode from '../../components/OptionNode.vue'
 import QuestionNode from '../../components/QuestionNode.vue'
 import { useFlowStore } from '../../stores/flow'
 
+const router = useRouter()
 const flowStore = useFlowStore()
 
 const selectedNode = ref(null)
@@ -265,9 +267,13 @@ function clearAllNodes() {
     console.log('All nodes and edges cleared')
   }
 }
+
+function goToSimulator() {
+  router.push('/simulator')
+}
 </script>
 <template>
-  <div class="flex h-screen">
+  <div class="flex h-screen bg-gray-100">
     <!-- Left Toolbar -->
     <div class="flex w-1/4 flex-col space-y-4 bg-gray-200 p-4">
       <h2 class="mb-4 text-xl font-semibold">工具欄</h2>
@@ -306,6 +312,20 @@ function clearAllNodes() {
           icon="pi pi-upload"
           class="p-button-sm w-full"
           @click="importFlow"
+        />
+      </div>
+
+      <!-- 分隔線 -->
+      <hr class="border-gray-300" />
+
+      <!-- 測試操作區域 -->
+      <div class="space-y-2">
+        <h3 class="text-sm font-medium text-gray-700">測試流程</h3>
+        <Button
+          label="測試流程"
+          icon="pi pi-play"
+          class="p-button-sm p-button-success w-full"
+          @click="goToSimulator"
         />
       </div>
 
