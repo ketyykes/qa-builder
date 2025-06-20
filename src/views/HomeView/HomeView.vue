@@ -1,4 +1,5 @@
 <script setup>
+import { markRaw } from 'vue'
 import { useRouter } from 'vue-router'
 
 import ConfirmDialog from 'primevue/confirmdialog'
@@ -48,10 +49,10 @@ const {
 
 const { exportFlow, importFlow } = useFileOperations()
 
-// 定義自訂節點類型
+// 定義自訂節點類型 - 使用 markRaw 防止組件變成響應式對象
 const nodeTypes = {
-  questionNode: QuestionNode,
-  optionNode: OptionNode,
+  questionNode: markRaw(QuestionNode),
+  optionNode: markRaw(OptionNode),
 }
 
 // 鍵盤事件處理
