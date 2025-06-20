@@ -59,6 +59,7 @@ export function useFileOperations() {
     }
   }
 
+  /** @param {() => void} clearSelectionCallback */
   function importFlow(clearSelectionCallback) {
     const input = document.createElement('input')
     input.type = 'file'

@@ -100,6 +100,10 @@ export function useNodeOperations() {
     }
   }
 
+  /**
+   * @param {import('vue').Ref<import('@vue-flow/core').GraphNode>} selectedNode
+   * @param {import('vue').Ref<string>}                             newOptionText
+   */
   function handleAddNewOption(selectedNode, newOptionText) {
     if (
       selectedNode.value &&

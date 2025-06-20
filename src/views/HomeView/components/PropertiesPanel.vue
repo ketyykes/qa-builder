@@ -132,11 +132,26 @@ import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
 
 defineProps({
-  selectedNode: Object,
-  selectedEdge: Object,
-  editableNodeText: String,
-  editableOptionMainText: String,
-  newOptionText: String,
+  selectedNode: {
+    type: Object,
+    default: null,
+  },
+  selectedEdge: {
+    type: Object,
+    default: null,
+  },
+  editableNodeText: {
+    type: String,
+    default: '',
+  },
+  editableOptionMainText: {
+    type: String,
+    default: '',
+  },
+  newOptionText: {
+    type: String,
+    default: '',
+  },
 })
 
 defineEmits([
