@@ -94,6 +94,8 @@
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 
+/** @import {QuestionNode, Option} from '@/types/flow' */
+
 defineProps({
   isStarted: {
     type: Boolean,
@@ -104,10 +106,12 @@ defineProps({
     required: true,
   },
   currentNode: {
+    /** @type {import('vue').PropType<QuestionNode | null>} */
     type: Object,
     default: null,
   },
   currentOptions: {
+    /** @type {import('vue').PropType<Option[]>} */
     type: Array,
     required: true,
   },

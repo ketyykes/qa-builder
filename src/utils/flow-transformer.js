@@ -84,8 +84,8 @@ export function transformToVueFlowElements(flowData) {
 
   const vueFlowEdges = flowData.edges.map((internalEdge) => ({
     id: internalEdge.id,
-    source: internalEdge.sourceId,
-    target: internalEdge.targetId,
+    source: internalEdge.source,
+    target: internalEdge.target,
     sourceHandle: internalEdge.sourceHandle,
     targetHandle: internalEdge.targetHandle,
   }))
@@ -137,8 +137,8 @@ export function transformFromVueFlowElements(
 
   const internalEdges = vueFlowEdges.map((vfEdge) => ({
     id: vfEdge.id,
-    sourceId: vfEdge.source,
-    targetId: vfEdge.target,
+    source: vfEdge.source,
+    target: vfEdge.target,
   }))
 
   return {

@@ -177,7 +177,7 @@ export const useFlowStore = defineStore('flow', () => {
 
     // Remove all edges that connect to or from this node
     edges.value = edges.value.filter(
-      (edge) => edge.sourceId !== nodeId && edge.targetId !== nodeId,
+      (edge) => edge.source !== nodeId && edge.target !== nodeId,
     )
 
     console.log(`Node ${nodeId} and its related edges have been deleted.`)
@@ -187,28 +187,28 @@ export const useFlowStore = defineStore('flow', () => {
    * Adds a new edge (connection) between two nodes.
    *
    * @param {object} payload
-   * @param {string} payload.sourceId       - The ID of the source node.
-   * @param {string} payload.targetId       - The ID of the target node.
+   * @param {string} payload.source         - The ID of the source node.
+   * @param {string} payload.target         - The ID of the target node.
    * @param {string} [payload.sourceHandle] - Optional source handle ID.
    * @param {string} [payload.targetHandle] - Optional target handle ID.
    */
-  function addEdge({ sourceId, targetId, sourceHandle, targetHandle }) {
+  function addEdge({ source, target, sourceHandle, targetHandle }) {
     // Check if source and target nodes exist
-    const sourceNode = nodes.value.find((node) => node.id === sourceId)
-    const targetNode = nodes.value.find((node) => node.id === targetId)
+    const sourceNode = nodes.value.find((node) => node.id === source)
+    const targetNode = nodes.value.find((node) => node.id === target)
 
     if (!sourceNode) {
-      console.warn(`Source node with id ${sourceId} not found.`)
+      console.warn(`Source node with id ${source} not found.`)
       return
     }
 
     if (!targetNode) {
-      console.warn(`Target node with id ${targetId} not found.`)
+      console.warn(`Target node with id ${target} not found.`)
       return
     }
 
     // Prevent self-connections
-    if (sourceId === targetId) {
+    if (source === target) {
       console.warn('不能連接節點到自己。')
       return
     }
@@ -216,41 +216,41 @@ export const useFlowStore = defineStore('flow', () => {
     // Check if edge already exists with the same source handle
     const existingEdge = edges.value.find(
       (edge) =>
-        edge.sourceId === sourceId &&
-        edge.targetId === targetId &&
+        edge.source === source &&
+        edge.target === target &&
         edge.sourceHandle === sourceHandle,
     )
 
     if (existingEdge) {
       console.warn(
-        `Edge from ${sourceId} (handle: ${sourceHandle}) to ${targetId} already exists.`,
+        `Edge from ${source} (handle: ${sourceHandle}) to ${target} already exists.`,
       )
       return
     }
 
     // Generate edge ID (include source handle if available for uniqueness)
     const edgeId = sourceHandle
-      ? `edge_${sourceId}_${sourceHandle}_to_${targetId}`
-      : `edge_${sourceId}_to_${targetId}`
+      ? `edge_${source}_${sourceHandle}_to_${target}`
+      : `edge_${source}_to_${target}`
 
     /** @type {FlowEdge} */
     const newEdge = {
       id: edgeId,
-      sourceId,
-      targetId,
+      source,
+      target,
       sourceHandle,
       targetHandle,
     }
 
     edges.value.push(newEdge)
-    console.log(`Edge added: ${sourceId} -> ${targetId}`)
+    console.log(`Edge added: ${source} -> ${target}`)
 
     // If source is an option node and sourceHandle is specified,
     // update the option's nextQuestionId
     if (sourceNode.type === 'option' && sourceHandle) {
       const option = sourceNode.options?.find((opt) => opt.id === sourceHandle)
       if (option) {
-        option.nextQuestionId = targetId
+        option.nextQuestionId = target
       }
     }
   }
@@ -273,7 +273,7 @@ export const useFlowStore = defineStore('flow', () => {
 
     // If this edge is connected to an option, clear the nextQuestionId
     const sourceNode = nodes.value.find(
-      (node) => node.id === edgeToRemove.sourceId,
+      (node) => node.id === edgeToRemove.source,
     )
     if (
       sourceNode &&
@@ -302,7 +302,7 @@ export const useFlowStore = defineStore('flow', () => {
   function removeNodeEdges({ nodeId }) {
     // Find all edges connected to this node
     const connectedEdges = edges.value.filter(
-      (edge) => edge.sourceId === nodeId || edge.targetId === nodeId,
+      (edge) => edge.source === nodeId || edge.target === nodeId,
     )
 
     // Remove each edge and update option references
@@ -324,8 +324,8 @@ export const useFlowStore = defineStore('flow', () => {
    */
   function onConnect(params) {
     addEdge({
-      sourceId: params.source,
-      targetId: params.target,
+      source: params.source,
+      target: params.target,
       sourceHandle: params.sourceHandle,
       targetHandle: params.targetHandle,
     })
@@ -347,8 +347,8 @@ export const useFlowStore = defineStore('flow', () => {
     // 檢查流程的完整性
     const connectedNodeIds = new Set()
     edges.value.forEach((edge) => {
-      connectedNodeIds.add(edge.sourceId)
-      connectedNodeIds.add(edge.targetId)
+      connectedNodeIds.add(edge.source)
+      connectedNodeIds.add(edge.target)
     })
     const isolatedNodes = nodes.value.filter(
       (node) => !connectedNodeIds.has(node.id),
@@ -488,22 +488,18 @@ export const useFlowStore = defineStore('flow', () => {
       const skippedEdges = []
 
       importData.edges.forEach((edge, index) => {
-        if (!edge.id || !edge.sourceId || !edge.targetId) {
+        if (!edge.id || !edge.source || !edge.target) {
           console.warn(`跳過無效連線 ${index}:`, edge)
           skippedEdges.push({
             index,
-            reason: '缺少必要欄位 (id, sourceId, targetId)',
+            reason: '缺少必要欄位 (id, source, target)',
           })
           return
         }
 
         // 檢查連線的節點是否存在
-        const sourceExists = validNodes.some(
-          (node) => node.id === edge.sourceId,
-        )
-        const targetExists = validNodes.some(
-          (node) => node.id === edge.targetId,
-        )
+        const sourceExists = validNodes.some((node) => node.id === edge.source)
+        const targetExists = validNodes.some((node) => node.id === edge.target)
 
         if (!sourceExists || !targetExists) {
           console.warn(`跳過無效連線 ${index}: 參照的節點不存在`)

@@ -69,13 +69,13 @@
   "edges": [
     {
       "id": "edge_node_0_to_node_1",
-      "sourceId": "node_0",
-      "targetId": "node_1"
+      "source": "node_0",
+      "target": "node_1"
     },
     {
       "id": "edge_node_1_to_node_2",
-      "sourceId": "node_1",
-      "targetId": "node_2",
+      "source": "node_1",
+      "target": "node_2",
       "sourceHandle": "opt_0"
     }
   ]

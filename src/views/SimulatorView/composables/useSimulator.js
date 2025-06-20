@@ -33,7 +33,7 @@ export function useSimulator() {
       (node) => node.type === 'question',
     )
     return questionNodes.find((node) => {
-      return !flowStore.edges.some((edge) => edge.targetId === node.id)
+      return !flowStore.edges.some((edge) => edge.target === node.id)
     })
   })
 
@@ -138,13 +138,13 @@ export function useSimulator() {
 
     // 找到從當前問句節點出發的邊
     const outgoingEdges = flowStore.edges.filter(
-      (edge) => edge.sourceId === currentNodeId.value,
+      (edge) => edge.source === currentNodeId.value,
     )
 
     if (outgoingEdges.length === 0) return []
 
     // 取第一個邊對應的選項節點（通常問句節點只會連接到一個選項節點）
-    const optionNodeId = outgoingEdges[0].targetId
+    const optionNodeId = outgoingEdges[0].target
     const optionNode = flowStore.nodes.find((node) => node.id === optionNodeId)
 
     // Type guard: 確保是選項節點才存取 options 屬性
