@@ -454,7 +454,7 @@ export const useFlowStore = defineStore('flow', () => {
         // 檢查節點類型
         if (node.type !== 'question' && node.type !== 'option') {
           console.warn(`跳過無效節點 ${index}: 未知類型 ${node.type}`)
-          skippedNodes.push({ index, reason: `未知節點類型: ${node.type}` })
+          skippedNodes.push({ index, reason: `未知節點類型：${node.type}` })
           return
         }
 
@@ -567,15 +567,15 @@ export const useFlowStore = defineStore('flow', () => {
         },
       }
 
-      console.log('匯入完成:', summary)
+      console.log('匯入完成：', summary)
 
       if (skippedNodes.length > 0 || skippedEdges.length > 0) {
-        console.warn('跳過的項目詳情:', { skippedNodes, skippedEdges })
+        console.warn('跳過的項目詳情：', { skippedNodes, skippedEdges })
       }
 
       return true
     } catch (error) {
-      console.error('匯入流程資料失敗:', error)
+      console.error('匯入流程資料失敗：', error)
       return false
     }
   }
