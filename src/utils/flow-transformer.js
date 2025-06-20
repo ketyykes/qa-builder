@@ -1,4 +1,5 @@
 // @ts-check
+import { Position } from '@vue-flow/core'
 
 /**
  * @typedef {import('../types/flow.d').FlowData}     FlowData
@@ -24,8 +25,8 @@
  * @property {{ text: string } | any} data             - 儲存節點的特定資料，例如文字內容，any
  *   用於彈性
  * @property {string}                 [label]          - 節點顯示的標籤
- * @property {string}                 [sourcePosition] - 連線起點位置
- * @property {string}                 [targetPosition] - 連線終點位置
+ * @property {Position}               [sourcePosition] - 連線起點位置
+ * @property {Position}               [targetPosition] - 連線終點位置
  */
 
 /**
@@ -94,19 +95,19 @@ export function transformToVueFlowElements(flowData) {
     // Add connection handles for option nodes
     if (internalNode.type === 'option' && internalNode.options) {
       // Add source handles for each option
-      vueFlowNode.sourcePosition = 'right' // Options connect from the right
+      vueFlowNode.sourcePosition = Position.Right // Options connect from the right
 
       // Store option handles in data for custom rendering if needed
       vueFlowNode.data.sourceHandles = internalNode.options.map((option) => ({
         id: option.id,
         type: 'source',
-        position: 'right',
+        position: Position.Right,
       }))
     }
 
     // Add target handle for question nodes
     if (internalNode.type === 'question') {
-      vueFlowNode.targetPosition = 'left' // Questions receive connections from the left
+      vueFlowNode.targetPosition = Position.Left // Questions receive connections from the left
     }
 
     return vueFlowNode
