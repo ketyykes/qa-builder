@@ -221,18 +221,25 @@ export const useFlowStore = defineStore('flow', () => {
       return
     }
 
-    // Check if edge already exists
+    // Check if edge already exists with the same source handle
     const existingEdge = edges.value.find(
-      (edge) => edge.sourceId === sourceId && edge.targetId === targetId,
+      (edge) =>
+        edge.sourceId === sourceId &&
+        edge.targetId === targetId &&
+        edge.sourceHandle === sourceHandle,
     )
 
     if (existingEdge) {
-      console.warn(`Edge from ${sourceId} to ${targetId} already exists.`)
+      console.warn(
+        `Edge from ${sourceId} (handle: ${sourceHandle}) to ${targetId} already exists.`,
+      )
       return
     }
 
-    // Generate edge ID
-    const edgeId = `edge_${sourceId}_to_${targetId}`
+    // Generate edge ID (include source handle if available for uniqueness)
+    const edgeId = sourceHandle
+      ? `edge_${sourceId}_${sourceHandle}_to_${targetId}`
+      : `edge_${sourceId}_to_${targetId}`
 
     /** @type {FlowEdge} */
     const newEdge = {
