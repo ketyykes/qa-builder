@@ -95,7 +95,7 @@ function onClearAllNodes() {
 <template>
   <ConfirmDialog />
   <Toast />
-  <div class="flex h-screen bg-gray-100">
+  <div class="flex min-h-[calc(100vh-4rem)] bg-gray-100">
     <!-- Left Toolbar -->
     <ToolbarSection
       @add-question-node="addNewQuestionNode"
@@ -107,8 +107,8 @@ function onClearAllNodes() {
     />
 
     <!-- Center Canvas Area -->
-    <div class="flex-1 bg-gray-100 p-4">
-      <h2 class="text-xl font-semibold">編輯畫布</h2>
+    <div class="min-h-[calc(100vh-4rem)] flex-1 bg-gray-100 p-4">
+      <h2 class="mb-4 text-xl font-semibold">編輯畫布</h2>
       <VueFlow
         :nodes="flowStore.vueFlowElements.nodes"
         :edges="flowStore.vueFlowElements.edges"
@@ -117,7 +117,7 @@ function onClearAllNodes() {
         :nodes-connectable="true"
         :edges-updatable="true"
         :default-edge-options="{ type: 'default', updatable: true }"
-        class="h-full w-full"
+        class="h-[calc(100vh-8rem)] w-full"
         @node-click="handleNodeClick"
         @edge-click="handleEdgeClick"
         @connect="handleConnect"

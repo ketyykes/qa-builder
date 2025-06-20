@@ -1,5 +1,7 @@
 <template>
-  <div class="flex w-1/4 flex-col space-y-4 bg-gray-200 p-4">
+  <div
+    class="flex min-h-[calc(100vh-4rem)] w-1/4 flex-col space-y-4 overflow-y-auto bg-gray-200 p-4"
+  >
     <h2 class="mb-4 text-xl font-semibold">工具欄</h2>
 
     <!-- 節點新增區域 -->

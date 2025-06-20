@@ -1,5 +1,5 @@
 <template>
-  <div class="w-1/4 bg-gray-300 p-4">
+  <div class="min-h-[calc(100vh-4rem)] w-1/4 overflow-y-auto bg-gray-300 p-4">
     <h2 class="text-xl font-semibold">屬性編輯</h2>
 
     <!-- 節點編輯區域 -->
