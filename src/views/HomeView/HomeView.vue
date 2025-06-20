@@ -3,8 +3,12 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 import Button from 'primevue/button'
+import ConfirmDialog from 'primevue/confirmdialog'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
+import Toast from 'primevue/toast'
+import { useConfirm } from 'primevue/useconfirm'
+import { useToast } from 'primevue/usetoast'
 
 import { VueFlow } from '@vue-flow/core'
 
@@ -17,6 +21,8 @@ import { useFlowStore } from '../../stores/flow'
 
 const router = useRouter()
 const flowStore = useFlowStore()
+const confirm = useConfirm()
+const toast = useToast()
 
 const selectedNode = ref(null)
 const selectedEdge = ref(null)
@@ -118,10 +124,19 @@ function handleAddNewOption() {
     })
     newOptionText.value = '' // Clear input after adding
   } else if (newOptionText.value.trim() === '') {
-    console.warn('新選項文字不可為空。')
-    // TODO: Provide user feedback via a toast message or similar
+    toast.add({
+      severity: 'warn',
+      summary: '輸入錯誤',
+      detail: '新選項文字不可為空。',
+      life: 3000,
+    })
   } else if (!selectedNode.value || selectedNode.value.type !== 'option') {
-    console.warn('請先選取一個選項節點。')
+    toast.add({
+      severity: 'warn',
+      summary: '選擇錯誤',
+      detail: '請先選取一個選項節點。',
+      life: 3000,
+    })
   }
 }
 
@@ -147,20 +162,40 @@ function handleDeleteNode() {
     const nodeText = selectedNode.value.text
 
     // 確認刪除
-    if (confirm(`確定要刪除節點「${nodeText}」嗎？此操作無法復原。`)) {
-      flowStore.deleteNode({ nodeId })
-      selectedNode.value = null // 清除選擇狀態
-    }
+    confirm.require({
+      message: `確定要刪除節點「${nodeText}」嗎？此操作無法復原。`,
+      header: '刪除節點確認',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: '確定刪除',
+      rejectLabel: '取消',
+      accept: () => {
+        flowStore.deleteNode({ nodeId })
+        selectedNode.value = null // 清除選擇狀態
+      },
+      reject: () => {
+        // 使用者取消，不執行任何動作
+      },
+    })
   }
 }
 
 function handleDeleteEdge() {
   if (selectedEdge.value) {
     const edgeId = selectedEdge.value.id
-    if (confirm(`確定要刪除此連線嗎？此操作無法復原。`)) {
-      flowStore.removeEdge({ edgeId })
-      selectedEdge.value = null // Clear selection after deletion
-    }
+    confirm.require({
+      message: '確定要刪除此連線嗎？此操作無法復原。',
+      header: '刪除連線確認',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: '確定刪除',
+      rejectLabel: '取消',
+      accept: () => {
+        flowStore.removeEdge({ edgeId })
+        selectedEdge.value = null // Clear selection after deletion
+      },
+      reject: () => {
+        // 使用者取消，不執行任何動作
+      },
+    })
   }
 }
 
@@ -206,7 +241,12 @@ function exportFlow() {
   try {
     // 檢查是否有內容可以匯出
     if (flowStore.nodes.length === 0) {
-      alert('目前沒有任何節點，無法匯出流程。請先建立一些節點。')
+      toast.add({
+        severity: 'warn',
+        summary: '無法匯出',
+        detail: '目前沒有任何節點，無法匯出流程。請先建立一些節點。',
+        life: 5000,
+      })
       return
     }
 
@@ -233,12 +273,20 @@ function exportFlow() {
     // 顯示成功訊息
     const stats = `包含 ${flowStore.nodes.length} 個節點和 ${flowStore.edges.length} 個連線`
     console.log('Flow exported successfully:', fileName)
-    alert(`✅ 流程匯出成功！\n檔案名稱：${fileName}\n內容：${stats}`)
+    toast.add({
+      severity: 'success',
+      summary: '匯出成功',
+      detail: `檔案名稱：${fileName}\n內容：${stats}`,
+      life: 6000,
+    })
   } catch (error) {
     console.error('Failed to export flow:', error)
-    alert(
-      `❌ 匯出失敗：${error.message}\n請稍後再試或檢查瀏覽器控制台了解詳細錯誤。`,
-    )
+    toast.add({
+      severity: 'error',
+      summary: '匯出失敗',
+      detail: `${error.message}，請稍後再試或檢查瀏覽器控制台了解詳細錯誤。`,
+      life: 8000,
+    })
   }
 }
 
@@ -254,13 +302,23 @@ function importFlow() {
     // 檢查檔案大小（限制為 10MB）
     const maxSize = 10 * 1024 * 1024 // 10MB
     if (file.size > maxSize) {
-      alert('❌ 檔案太大！請選擇小於 10MB 的檔案。')
+      toast.add({
+        severity: 'error',
+        summary: '檔案太大',
+        detail: '請選擇小於 10MB 的檔案。',
+        life: 5000,
+      })
       return
     }
 
     // 檢查檔案類型
     if (!file.name.toLowerCase().endsWith('.json')) {
-      alert('❌ 請選擇 JSON 格式的檔案。')
+      toast.add({
+        severity: 'error',
+        summary: '檔案格式錯誤',
+        detail: '請選擇 JSON 格式的檔案。',
+        life: 5000,
+      })
       return
     }
 
@@ -270,7 +328,7 @@ function importFlow() {
         const jsonString = e.target.result
 
         // 顯示載入中訊息
-        console.log('開始匯入流程檔案:', file.name)
+        console.log('開始匯入流程檔案：', file.name)
 
         const success = flowStore.importNodeGraph(jsonString)
 
@@ -289,14 +347,6 @@ function importFlow() {
             (n) => n.type === 'option',
           ).length
 
-          const successMessage = `✅ 流程匯入成功！
-檔案名稱：${file.name}
-匯入內容：
-• ${nodeCount} 個節點（${questionNodes} 個問句，${optionNodes} 個選項）
-• ${edgeCount} 個連線
-
-流程已載入到編輯畫布中。`
-
           console.log('Flow imported successfully:', {
             fileName: file.name,
             nodeCount,
@@ -305,35 +355,38 @@ function importFlow() {
             optionNodes,
           })
 
-          alert(successMessage)
+          toast.add({
+            severity: 'success',
+            summary: '匯入成功',
+            detail: `檔案名稱：${file.name}\n匯入 ${nodeCount} 個節點（${questionNodes} 個問句，${optionNodes} 個選項）和 ${edgeCount} 個連線`,
+            life: 8000,
+          })
         } else {
-          alert(`❌ 匯入失敗：JSON 格式不正確或檔案內容無效。
-檔案名稱：${file.name}
-
-請確認：
-• 檔案是由 QA Builder 匯出的 JSON 格式
-• 檔案內容完整且未被修改
-• 檔案編碼為 UTF-8
-
-詳細錯誤資訊請查看瀏覽器控制台。`)
+          toast.add({
+            severity: 'error',
+            summary: '匯入失敗',
+            detail: `JSON 格式不正確或檔案內容無效。請確認檔案是由 QA Builder 匯出的有效 JSON 格式。`,
+            life: 8000,
+          })
         }
       } catch (error) {
         console.error('Failed to import flow:', error)
-        alert(`❌ 匯入失敗：檔案解析錯誤
-檔案名稱：${file.name}
-錯誤詳情：${error.message}
-
-可能的原因：
-• 檔案格式不是有效的 JSON
-• 檔案內容損壞
-• 檔案編碼問題
-
-請檢查檔案是否完整且格式正確。`)
+        toast.add({
+          severity: 'error',
+          summary: '匯入失敗',
+          detail: `檔案解析錯誤：${error.message}。請檢查檔案是否完整且格式正確。`,
+          life: 8000,
+        })
       }
     }
 
     reader.onerror = () => {
-      alert(`❌ 檔案讀取失敗：無法讀取檔案 ${file.name}`)
+      toast.add({
+        severity: 'error',
+        summary: '檔案讀取失敗',
+        detail: `無法讀取檔案 ${file.name}`,
+        life: 5000,
+      })
     }
 
     reader.readAsText(file, 'UTF-8')
@@ -343,12 +396,22 @@ function importFlow() {
 }
 
 function clearAllNodes() {
-  if (confirm('確定要清空所有節點和連線嗎？此操作無法復原。')) {
-    flowStore.clearAll()
-    selectedNode.value = null
-    selectedEdge.value = null
-    console.log('All nodes and edges cleared')
-  }
+  confirm.require({
+    message: '確定要清空所有節點和連線嗎？此操作無法復原。',
+    header: '清空全部確認',
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: '確定清空',
+    rejectLabel: '取消',
+    accept: () => {
+      flowStore.clearAll()
+      selectedNode.value = null
+      selectedEdge.value = null
+      console.log('All nodes and edges cleared')
+    },
+    reject: () => {
+      // 使用者取消，不執行任何動作
+    },
+  })
 }
 
 function goToSimulator() {
@@ -356,6 +419,8 @@ function goToSimulator() {
 }
 </script>
 <template>
+  <ConfirmDialog />
+  <Toast />
   <div class="flex h-screen bg-gray-100">
     <!-- Left Toolbar -->
     <div class="flex w-1/4 flex-col space-y-4 bg-gray-200 p-4">

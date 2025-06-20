@@ -1,0 +1,329 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "exportDate": "2024-12-20T11:00:00.000Z",
+    "appName": "QA Builder",
+    "appVersion": "1.0.0",
+    "nodeCount": 12,
+    "edgeCount": 11,
+    "statistics": {
+      "questionNodes": 8,
+      "optionNodes": 4,
+      "totalOptions": 12,
+      "isolatedNodes": 0,
+      "connectedNodes": 12
+    },
+    "flowProperties": {
+      "hasStartNode": true,
+      "hasEndNodes": true,
+      "maxDepth": null,
+      "tags": [
+        "客服",
+        "範例",
+        "完整流程"
+      ],
+      "description": "完整的客服自動回覆流程範例"
+    }
+  },
+  "nodes": [
+    {
+      "id": "node_0",
+      "type": "question",
+      "text": "您好！歡迎來到客服中心，請問今天需要什麼幫助？",
+      "position": {
+        "x": 100,
+        "y": 100
+      }
+    },
+    {
+      "id": "node_1",
+      "type": "option",
+      "text": "服務類型選擇",
+      "options": [
+        {
+          "id": "opt_0",
+          "text": "產品諮詢",
+          "nextQuestionId": "node_2"
+        },
+        {
+          "id": "opt_1",
+          "text": "技術支援",
+          "nextQuestionId": "node_4"
+        },
+        {
+          "id": "opt_2",
+          "text": "帳號問題",
+          "nextQuestionId": "node_6"
+        },
+        {
+          "id": "opt_3",
+          "text": "其他問題",
+          "nextQuestionId": "node_8"
+        }
+      ],
+      "position": {
+        "x": 100,
+        "y": 250
+      }
+    },
+    {
+      "id": "node_2",
+      "type": "question",
+      "text": "請問您想了解哪方面的產品資訊？",
+      "position": {
+        "x": 400,
+        "y": 50
+      }
+    },
+    {
+      "id": "node_3",
+      "type": "option",
+      "text": "產品資訊類型",
+      "options": [
+        {
+          "id": "opt_4",
+          "text": "產品功能介紹",
+          "nextQuestionId": "node_9"
+        },
+        {
+          "id": "opt_5",
+          "text": "價格方案",
+          "nextQuestionId": "node_10"
+        },
+        {
+          "id": "opt_6",
+          "text": "購買流程",
+          "nextQuestionId": "node_11"
+        }
+      ],
+      "position": {
+        "x": 400,
+        "y": 150
+      }
+    },
+    {
+      "id": "node_4",
+      "type": "question",
+      "text": "請描述您遇到的技術問題類型：",
+      "position": {
+        "x": 400,
+        "y": 250
+      }
+    },
+    {
+      "id": "node_5",
+      "type": "option",
+      "text": "技術問題類型",
+      "options": [
+        {
+          "id": "opt_7",
+          "text": "無法登入",
+          "nextQuestionId": "node_12"
+        },
+        {
+          "id": "opt_8",
+          "text": "功能異常",
+          "nextQuestionId": "node_12"
+        },
+        {
+          "id": "opt_9",
+          "text": "操作教學",
+          "nextQuestionId": "node_12"
+        }
+      ],
+      "position": {
+        "x": 400,
+        "y": 350
+      }
+    },
+    {
+      "id": "node_6",
+      "type": "question",
+      "text": "請問您的帳號問題是？",
+      "position": {
+        "x": 400,
+        "y": 450
+      }
+    },
+    {
+      "id": "node_7",
+      "type": "option",
+      "text": "帳號問題類型",
+      "options": [
+        {
+          "id": "opt_10",
+          "text": "忘記密碼",
+          "nextQuestionId": "node_13"
+        },
+        {
+          "id": "opt_11",
+          "text": "帳號被鎖定",
+          "nextQuestionId": "node_13"
+        },
+        {
+          "id": "opt_12",
+          "text": "修改個人資料",
+          "nextQuestionId": "node_13"
+        }
+      ],
+      "position": {
+        "x": 400,
+        "y": 550
+      }
+    },
+    {
+      "id": "node_8",
+      "type": "question",
+      "text": "感謝您的詢問！我們會將您的問題轉給專人處理。請留下您的聯絡方式，我們會盡快回覆您。如果是緊急問題，也可以直接撥打客服專線：0800-123-456",
+      "position": {
+        "x": 400,
+        "y": 650
+      }
+    },
+    {
+      "id": "node_9",
+      "type": "question",
+      "text": "我們的產品具有以下核心功能：\n1. 視覺化決策樹建立\n2. 即時預覽與測試\n3. JSON 匯出/匯入\n4. 響應式設計\n\n如需更詳細的功能介紹，請聯繫我們的銷售團隊！",
+      "position": {
+        "x": 700,
+        "y": 50
+      }
+    },
+    {
+      "id": "node_10",
+      "type": "question",
+      "text": "我們提供多種彈性的價格方案：\n\n基礎版：免費（限 5 個流程）\n專業版：NT$999/月（無限流程）\n企業版：NT$2999/月（含技術支援）\n\n詳細方案請參考官網或聯繫銷售團隊！",
+      "position": {
+        "x": 700,
+        "y": 150
+      }
+    },
+    {
+      "id": "node_11",
+      "type": "question",
+      "text": "購買流程非常簡單：\n1. 註冊帳號\n2. 選擇適合的方案\n3. 線上付款\n4. 立即開始使用\n\n如有任何問題，歡迎隨時聯繫我們！",
+      "position": {
+        "x": 700,
+        "y": 250
+      }
+    },
+    {
+      "id": "node_12",
+      "type": "question",
+      "text": "我們已收到您的技術問題回報。請您先嘗試以下步驟：\n1. 清除瀏覽器快取\n2. 重新整理頁面\n3. 檢查網路連線\n\n如問題持續存在，我們的技術團隊會在 24 小時內與您聯繫。",
+      "position": {
+        "x": 700,
+        "y": 350
+      }
+    },
+    {
+      "id": "node_13",
+      "type": "question",
+      "text": "帳號相關問題我們非常重視您的資料安全！\n\n請透過以下方式處理：\n1. 使用「忘記密碼」功能重設\n2. 聯繫客服專線確認身分\n3. 提供註冊時的郵箱地址\n\n我們會儘快協助您解決帳號問題。",
+      "position": {
+        "x": 700,
+        "y": 450
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_0",
+      "sourceId": "node_0",
+      "targetId": "node_1"
+    },
+    {
+      "id": "edge_1",
+      "sourceId": "node_1",
+      "targetId": "node_2",
+      "sourceHandle": "opt_0"
+    },
+    {
+      "id": "edge_2",
+      "sourceId": "node_1",
+      "targetId": "node_4",
+      "sourceHandle": "opt_1"
+    },
+    {
+      "id": "edge_3",
+      "sourceId": "node_1",
+      "targetId": "node_6",
+      "sourceHandle": "opt_2"
+    },
+    {
+      "id": "edge_4",
+      "sourceId": "node_1",
+      "targetId": "node_8",
+      "sourceHandle": "opt_3"
+    },
+    {
+      "id": "edge_5",
+      "sourceId": "node_2",
+      "targetId": "node_3"
+    },
+    {
+      "id": "edge_6",
+      "sourceId": "node_4",
+      "targetId": "node_5"
+    },
+    {
+      "id": "edge_7",
+      "sourceId": "node_6",
+      "targetId": "node_7"
+    },
+    {
+      "id": "edge_8",
+      "sourceId": "node_3",
+      "targetId": "node_9",
+      "sourceHandle": "opt_4"
+    },
+    {
+      "id": "edge_9",
+      "sourceId": "node_3",
+      "targetId": "node_10",
+      "sourceHandle": "opt_5"
+    },
+    {
+      "id": "edge_10",
+      "sourceId": "node_3",
+      "targetId": "node_11",
+      "sourceHandle": "opt_6"
+    },
+    {
+      "id": "edge_11",
+      "sourceId": "node_5",
+      "targetId": "node_12",
+      "sourceHandle": "opt_7"
+    },
+    {
+      "id": "edge_12",
+      "sourceId": "node_5",
+      "targetId": "node_12",
+      "sourceHandle": "opt_8"
+    },
+    {
+      "id": "edge_13",
+      "sourceId": "node_5",
+      "targetId": "node_12",
+      "sourceHandle": "opt_9"
+    },
+    {
+      "id": "edge_14",
+      "sourceId": "node_7",
+      "targetId": "node_13",
+      "sourceHandle": "opt_10"
+    },
+    {
+      "id": "edge_15",
+      "sourceId": "node_7",
+      "targetId": "node_13",
+      "sourceHandle": "opt_11"
+    },
+    {
+      "id": "edge_16",
+      "sourceId": "node_7",
+      "targetId": "node_13",
+      "sourceHandle": "opt_12"
+    }
+  ]
+}
