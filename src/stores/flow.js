@@ -338,12 +338,49 @@ export const useFlowStore = defineStore('flow', () => {
    * @returns {string} JSON string containing all nodes and edges data
    */
   function exportNodeGraph() {
+    // 計算一些統計資訊
+    const questionNodes = nodes.value.filter((node) => node.type === 'question')
+    const optionNodes = nodes.value.filter((node) => node.type === 'option')
+    const totalOptions = optionNodes.reduce((total, node) => {
+      return total + (node.options ? node.options.length : 0)
+    }, 0)
+
+    // 檢查流程的完整性
+    const connectedNodeIds = new Set()
+    edges.value.forEach((edge) => {
+      connectedNodeIds.add(edge.sourceId)
+      connectedNodeIds.add(edge.targetId)
+    })
+    const isolatedNodes = nodes.value.filter(
+      (node) => !connectedNodeIds.has(node.id),
+    )
+
     const exportData = {
       version: '1.0.0',
       metadata: {
         exportDate: new Date().toISOString(),
+        appName: 'QA Builder',
+        appVersion: '1.0.0',
         nodeCount: nodes.value.length,
         edgeCount: edges.value.length,
+        statistics: {
+          questionNodes: questionNodes.length,
+          optionNodes: optionNodes.length,
+          totalOptions: totalOptions,
+          isolatedNodes: isolatedNodes.length,
+          connectedNodes: connectedNodeIds.size,
+        },
+        // 為未來功能預留欄位
+        flowProperties: {
+          hasStartNode: nodes.value.some((node) => node.type === 'question'),
+          hasEndNodes: optionNodes.some(
+            (node) =>
+              node.options && node.options.some((opt) => !opt.nextQuestionId),
+          ),
+          maxDepth: null, // 可以在未來計算流程深度
+          tags: [], // 可以在未來添加標籤功能
+          description: '', // 可以在未來添加流程描述
+        },
       },
       nodes: nodes.value,
       edges: edges.value,
@@ -362,44 +399,137 @@ export const useFlowStore = defineStore('flow', () => {
     try {
       const importData = JSON.parse(jsonString)
 
-      // Validate the structure
+      // 詳細驗證匯入資料的結構
+      if (!importData || typeof importData !== 'object') {
+        console.error('Invalid JSON: 根物件格式不正確')
+        return false
+      }
+
+      // 檢查版本相容性
+      if (importData.version && importData.version !== '1.0.0') {
+        console.warn(
+          `版本不匹配：檔案版本 ${importData.version}，目前支援版本 1.0.0`,
+        )
+        // 繼續匯入，但發出警告
+      }
+
+      // 驗證必要欄位
       if (!importData.nodes || !Array.isArray(importData.nodes)) {
-        console.error('Invalid JSON: nodes array is missing or invalid')
+        console.error('Invalid JSON: nodes 陣列遺失或格式不正確')
         return false
       }
 
       if (!importData.edges || !Array.isArray(importData.edges)) {
-        console.error('Invalid JSON: edges array is missing or invalid')
+        console.error('Invalid JSON: edges 陣列遺失或格式不正確')
         return false
       }
 
-      // Clear current data
+      // 驗證節點資料
+      const validNodes = []
+      const skippedNodes = []
+
+      importData.nodes.forEach((node, index) => {
+        // 檢查必要欄位
+        if (
+          !node.id ||
+          !node.type ||
+          !node.position ||
+          typeof node.text !== 'string'
+        ) {
+          console.warn(`跳過無效節點 ${index}:`, node)
+          skippedNodes.push({
+            index,
+            reason: '缺少必要欄位 (id, type, position, text)',
+          })
+          return
+        }
+
+        // 檢查節點類型
+        if (node.type !== 'question' && node.type !== 'option') {
+          console.warn(`跳過無效節點 ${index}: 未知類型 ${node.type}`)
+          skippedNodes.push({ index, reason: `未知節點類型: ${node.type}` })
+          return
+        }
+
+        // 檢查位置格式
+        if (
+          (!node.position.x && node.position.x !== 0) ||
+          (!node.position.y && node.position.y !== 0)
+        ) {
+          console.warn(`跳過無效節點 ${index}: 位置格式不正確`)
+          skippedNodes.push({ index, reason: '位置格式不正確' })
+          return
+        }
+
+        // 驗證選項節點的額外資料
+        if (node.type === 'option') {
+          if (!node.options || !Array.isArray(node.options)) {
+            // 如果沒有 options 陣列，建立空陣列
+            node.options = []
+          } else {
+            // 驗證每個選項
+            node.options = node.options.filter((option, optIndex) => {
+              if (!option.id || typeof option.text !== 'string') {
+                console.warn(
+                  `跳過節點 ${node.id} 中的無效選項 ${optIndex}:`,
+                  option,
+                )
+                return false
+              }
+              return true
+            })
+          }
+        }
+
+        validNodes.push(node)
+      })
+
+      // 驗證邊資料
+      const validEdges = []
+      const skippedEdges = []
+
+      importData.edges.forEach((edge, index) => {
+        if (!edge.id || !edge.sourceId || !edge.targetId) {
+          console.warn(`跳過無效連線 ${index}:`, edge)
+          skippedEdges.push({
+            index,
+            reason: '缺少必要欄位 (id, sourceId, targetId)',
+          })
+          return
+        }
+
+        // 檢查連線的節點是否存在
+        const sourceExists = validNodes.some(
+          (node) => node.id === edge.sourceId,
+        )
+        const targetExists = validNodes.some(
+          (node) => node.id === edge.targetId,
+        )
+
+        if (!sourceExists || !targetExists) {
+          console.warn(`跳過無效連線 ${index}: 參照的節點不存在`)
+          skippedEdges.push({ index, reason: '參照的節點不存在' })
+          return
+        }
+
+        validEdges.push(edge)
+      })
+
+      // 如果沒有有效資料，則失敗
+      if (validNodes.length === 0) {
+        console.error('匯入失敗：沒有有效的節點資料')
+        return false
+      }
+
+      // 清除目前資料並匯入新資料
       nodes.value = []
       edges.value = []
 
-      // Import nodes
-      importData.nodes.forEach((node) => {
-        // Validate node structure
-        if (!node.id || !node.type || !node.position) {
-          console.warn('Skipping invalid node:', node)
-          return
-        }
+      // 匯入有效的節點和邊
+      nodes.value = validNodes
+      edges.value = validEdges
 
-        nodes.value.push(node)
-      })
-
-      // Import edges
-      importData.edges.forEach((edge) => {
-        // Validate edge structure
-        if (!edge.id || !edge.sourceId || !edge.targetId) {
-          console.warn('Skipping invalid edge:', edge)
-          return
-        }
-
-        edges.value.push(edge)
-      })
-
-      // Update counters to avoid ID conflicts
+      // 更新計數器以避免 ID 衝突
       const maxNodeId = nodes.value.reduce((max, node) => {
         const match = node.id.match(/^node_(\d+)$/)
         return match ? Math.max(max, parseInt(match[1])) : max
@@ -418,12 +548,27 @@ export const useFlowStore = defineStore('flow', () => {
       nodeIdCounter = maxNodeId + 1
       optionIdCounter = maxOptionId + 1
 
-      console.log(
-        `Successfully imported ${nodes.value.length} nodes and ${edges.value.length} edges`,
-      )
+      // 報告匯入結果
+      const summary = {
+        imported: {
+          nodes: validNodes.length,
+          edges: validEdges.length,
+        },
+        skipped: {
+          nodes: skippedNodes.length,
+          edges: skippedEdges.length,
+        },
+      }
+
+      console.log('匯入完成:', summary)
+
+      if (skippedNodes.length > 0 || skippedEdges.length > 0) {
+        console.warn('跳過的項目詳情:', { skippedNodes, skippedEdges })
+      }
+
       return true
     } catch (error) {
-      console.error('Failed to import flow data:', error)
+      console.error('匯入流程資料失敗:', error)
       return false
     }
   }
