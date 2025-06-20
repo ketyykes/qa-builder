@@ -204,22 +204,41 @@ function handleNodesChange(changes) {
 // 儲存/載入功能
 function exportFlow() {
   try {
+    // 檢查是否有內容可以匯出
+    if (flowStore.nodes.length === 0) {
+      alert('目前沒有任何節點，無法匯出流程。請先建立一些節點。')
+      return
+    }
+
     const jsonData = flowStore.exportNodeGraph()
     const blob = new Blob([jsonData], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
 
+    // 生成更有意義的檔案名稱
+    const now = new Date()
+    const dateStr = now.toISOString().split('T')[0] // YYYY-MM-DD
+    const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-') // HH-MM-SS
+    const nodeCount = flowStore.nodes.length
+    const fileName = `qa-flow-${nodeCount}nodes-${dateStr}-${timeStr}.json`
+
     const link = document.createElement('a')
     link.href = url
-    link.download = `qa-flow-${new Date().toISOString().split('T')[0]}.json`
+    link.download = fileName
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
 
     URL.revokeObjectURL(url)
-    console.log('Flow exported successfully')
+
+    // 顯示成功訊息
+    const stats = `包含 ${flowStore.nodes.length} 個節點和 ${flowStore.edges.length} 個連線`
+    console.log('Flow exported successfully:', fileName)
+    alert(`✅ 流程匯出成功！\n檔案名稱：${fileName}\n內容：${stats}`)
   } catch (error) {
     console.error('Failed to export flow:', error)
-    alert('匯出失敗，請稍後再試。')
+    alert(
+      `❌ 匯出失敗：${error.message}\n請稍後再試或檢查瀏覽器控制台了解詳細錯誤。`,
+    )
   }
 }
 
@@ -232,28 +251,92 @@ function importFlow() {
     const file = event.target.files[0]
     if (!file) return
 
+    // 檢查檔案大小（限制為 10MB）
+    const maxSize = 10 * 1024 * 1024 // 10MB
+    if (file.size > maxSize) {
+      alert('❌ 檔案太大！請選擇小於 10MB 的檔案。')
+      return
+    }
+
+    // 檢查檔案類型
+    if (!file.name.toLowerCase().endsWith('.json')) {
+      alert('❌ 請選擇 JSON 格式的檔案。')
+      return
+    }
+
     const reader = new FileReader()
     reader.onload = (e) => {
       try {
         const jsonString = e.target.result
+
+        // 顯示載入中訊息
+        console.log('開始匯入流程檔案:', file.name)
+
         const success = flowStore.importNodeGraph(jsonString)
 
         if (success) {
           // 清除選擇狀態
           selectedNode.value = null
           selectedEdge.value = null
-          console.log('Flow imported successfully')
-          alert('流程匯入成功！')
+
+          // 顯示詳細的成功訊息
+          const nodeCount = flowStore.nodes.length
+          const edgeCount = flowStore.edges.length
+          const questionNodes = flowStore.nodes.filter(
+            (n) => n.type === 'question',
+          ).length
+          const optionNodes = flowStore.nodes.filter(
+            (n) => n.type === 'option',
+          ).length
+
+          const successMessage = `✅ 流程匯入成功！
+檔案名稱：${file.name}
+匯入內容：
+• ${nodeCount} 個節點（${questionNodes} 個問句，${optionNodes} 個選項）
+• ${edgeCount} 個連線
+
+流程已載入到編輯畫布中。`
+
+          console.log('Flow imported successfully:', {
+            fileName: file.name,
+            nodeCount,
+            edgeCount,
+            questionNodes,
+            optionNodes,
+          })
+
+          alert(successMessage)
         } else {
-          alert('匯入失敗：JSON 格式不正確。')
+          alert(`❌ 匯入失敗：JSON 格式不正確或檔案內容無效。
+檔案名稱：${file.name}
+
+請確認：
+• 檔案是由 QA Builder 匯出的 JSON 格式
+• 檔案內容完整且未被修改
+• 檔案編碼為 UTF-8
+
+詳細錯誤資訊請查看瀏覽器控制台。`)
         }
       } catch (error) {
         console.error('Failed to import flow:', error)
-        alert('匯入失敗：檔案格式錯誤。')
+        alert(`❌ 匯入失敗：檔案解析錯誤
+檔案名稱：${file.name}
+錯誤詳情：${error.message}
+
+可能的原因：
+• 檔案格式不是有效的 JSON
+• 檔案內容損壞
+• 檔案編碼問題
+
+請檢查檔案是否完整且格式正確。`)
       }
     }
 
-    reader.readAsText(file)
+    reader.onerror = () => {
+      alert(`❌ 檔案讀取失敗：無法讀取檔案 ${file.name}`)
+    }
+
+    reader.readAsText(file, 'UTF-8')
   }
 
   input.click()
